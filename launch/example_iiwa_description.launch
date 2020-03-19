@@ -1,12 +1,20 @@
 <?xml version="1.0"?>
 <launch>
-  
   <!-- This lauch file just loads the URDF with the given hardware interface and robot name into the ROS Parameter Server -->
   <arg name="hardware_interface" default="PositionJointInterface"/> 
   <arg name="robot_name" default="iiwa"/>
   <arg name="model" default="iiwa14"/>
-  
-  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find iiwa_fri_description)/rviz/example_iiwa.rviz" />
+  <arg name="rviz" default="false"/>
+  <arg name="robot_state" default="false"/>
+
   <param name="robot_description" command="xacro --inorder '$(find iiwa_fri_description)/urdf/example_$(arg model).urdf.xacro' hardware_interface:=$(arg hardware_interface) robot_name:=$(arg robot_name)" />
   
+  <group if="$(arg rviz)">
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find iiwa_fri_description)/rviz/example_iiwa.rviz" />
+  </group>
+
+  <group if="$(arg robot_state)">
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+  </group>
+
 </launch>

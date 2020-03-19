@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- These are the arguments you can pass this launch file, for example paused:=true -->
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="false"/>
+    <arg name="hardware_interface" default="PositionJointInterface"/>
+    <arg name="robot_name" default="iiwa" />
+    <arg name="model" default="iiwa14"/>
+    
+    <!-- Load Description -->
+    <param name="robot_description" command="xacro --inorder '$(find iiwa_fri_description)/urdf/example_$(arg model).urdf.xacro' hardware_interface:=$(arg hardware_interface) robot_name:=$(arg robot_name)" />
+
+    <!-- RViz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find iiwa_fri_description)/config/example_iiwa.rviz" />
+
+    <!-- Gazebo -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find iiwa_fri_description)/worlds/iiwa.world"/>
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    </include>
+    
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+          args="-urdf -model iiwa -param robot_description"/>
+
+    <!-- ROS Controller -->
+    <rosparam file="$(find iiwa_fri_description)/config/controller.yaml" command="load" />
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+          output="screen" ns="/$(arg robot_name)" args="joint_state_controller $(arg hardware_interface)_trajectory_controller --shutdown-timeout 2" />
+
+    <!-- Robot State Publisher -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <remap from="joint_states" to="/$(arg robot_name)/joint_states" />
+    </node>
+</launch>
