@@ -15,7 +15,7 @@
 
     <!-- RViz -->
     <group if="$(arg rviz)">
-        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find iiwa_fri_description)/rviz/example_iiwa.rviz" />
+        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find iiwa_fri_description)/config/example_iiwa.rviz" />
     </group>
 
     <!-- Gazebo -->
