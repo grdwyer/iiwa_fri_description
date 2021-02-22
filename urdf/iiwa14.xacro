@@ -17,6 +17,11 @@
   <xacro:property name="max_effort" value="300"/> <!-- Should be changed to match the robots specs -->
   
   <xacro:macro name="iiwa14" params="hardware_interface robot_name">
+
+    <xacro:arg name="use_ros2_control" default="true"/>
+    <xacro:arg name="robot_ip" default="192.170.10.2"/>
+    <xacro:arg name="robot_port" default="30200"/>
+
     
     <link name="${robot_name}_link_0">
       <inertial>
@@ -333,9 +338,18 @@
     </link>
     
     <!--Extensions -->
-    <xacro:iiwa_gazebo robot_name="${robot_name}" />
-    <xacro:iiwa_transmission hardware_interface="${hardware_interface}" robot_name="${robot_name}"/>
-    
+    <xacro:if value="$(arg use_ros2_control)" >
+      <xacro:include filename="$(find iiwa_fri_ros)/config/iiwa.ros2_control.xacro" />
+      <xacro:iiwa_position_only name="IiwaPositionHardwareInterface"
+                                robot_ip="$(arg robot_ip)"
+                                robot_port="$(arg robot_port)"/>
+    </xacro:if>
+
+    <xacro:unless value="$(arg use_ros2_control)" >
+      <xacro:iiwa_gazebo robot_name="${robot_name}" />
+      <xacro:iiwa_transmission hardware_interface="${hardware_interface}" robot_name="${robot_name}"/>
+    </xacro:unless>
+
   </xacro:macro>
   
 </robot>
